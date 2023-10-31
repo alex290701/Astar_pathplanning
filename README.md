@@ -8,3 +8,6 @@ Once the Rviz starts you can provide the start point with 2D pose estimate and e
 
 **Note:** Please make sure both the points are inside the map.
 Feel free to try any other maze maps if you could.
+
+## Output
+![Output](Astar.png)
