@@ -46,9 +46,7 @@
   <node pkg="map_server" name="map_server" type="map_server"
     args="$(find model_description)/maps/my_world_map.yaml" />
 
-  <!-- <include file="$(find robot_navigation)/launch/robot_navigation.launch"> -->
-    <!-- <arg name="no_static_map" value="true" /> -->
-  <!-- </include> -->
+  <include file="$(find robot_navigation)/launch/robot_navigation.launch"/>
 
   <!-- <node name="landmark_distance" pkg="robot_navigation" type="distance_calculator.py" /> -->
 
