@@ -77,8 +77,8 @@ namespace astar_planner
         bool isCellInsideMap(float x, float y);
         void mapToWorld(double mx, double my, double &wx, double &wy);
         vector<int> RAstarPlanner(int startCell, int goalCell);
-        vector<int> findPath(int startCell, int goalCell, float g_score[]);
-        vector<int> constructPath(int startCell, int goalCell, float g_score[]);
+        vector<int> findPath(int startCell, int goalCell, std::vector<float> g_score);
+        vector<int> constructPath(int startCell, int goalCell, std::vector<float> g_score);
         float calculateHCost(int cellID, int goalCell)
         {
             int x1 = getCellRowID(goalCell);
@@ -88,7 +88,7 @@ namespace astar_planner
             return abs(x1 - x2) + abs(y1 - y2);
             // return min(abs(x1-x2),abs(y1-y2))*sqrt(2) + max(abs(x1-x2),abs(y1-y2))-min(abs(x1-x2),abs(y1-y2));
         }
-        void addNeighborCellToOpenList(multiset<cells> &OPL, int neighborCell, int goalCell, float g_score[]);
+        void addNeighborCellToOpenList(multiset<cells> &OPL, int neighborCell, int goalCell, std::vector<float> g_score);
         vector<int> findFreeNeighborCell(int CellID);
         bool isStartAndGoalCellsValid(int startCell, int goalCell);
         float getMoveCost(int CellID1, int CellID2);

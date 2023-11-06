@@ -10,6 +10,7 @@ bool *OGM;
 static const float INFINIT_COST = INT_MAX; //!< cost of non connected nodes
 float infinity = std::numeric_limits<float>::infinity();
 float tBreak; // coefficient for breaking ties
+ros::Publisher path_pub;
 ofstream MyExcelFile("A*_result.xlsx", ios::trunc);
 
 int clock_gettime(clockid_t clk_id, struct timespect *tp);
@@ -34,8 +35,8 @@ inline vector<int> findFreeNeighborCell(int CellID);
 
 namespace astar_planner
 {
-    AstarPlanner::AstarPlanner(){
-        
+    AstarPlanner::AstarPlanner()
+    {
     }
     AstarPlanner::AstarPlanner(ros::NodeHandle &nh)
     {
@@ -84,6 +85,7 @@ namespace astar_planner
 
             ROS_INFO("RAstar planner initialized successfully");
             initialized_ = true;
+            path_pub = ROSNodeHandle.advertise<nav_msgs::Path>("astar_path", 1); // Advertise the path topic
         }
         else
             ROS_WARN("This planner has already been initialized... doing nothing");
@@ -96,7 +98,6 @@ namespace astar_planner
             ROS_ERROR("The planner has not been initialized, please call initialize() to use the planner");
             return false;
         }
-
         ROS_DEBUG("Got a start: %.2f, %.2f, and a goal: %.2f, %.2f", start.pose.position.x, start.pose.position.y,
                   goal.pose.position.x, goal.pose.position.y);
 
@@ -152,7 +153,6 @@ namespace astar_planner
 
             vector<int> bestPath;
             bestPath.clear();
-
             bestPath = RAstarPlanner(startCell, goalCell);
 
             // if the global planner find a path
@@ -168,7 +168,6 @@ namespace astar_planner
                     float y = 0.0;
 
                     int index = bestPath[i];
-
                     convertToCoordinate(index, x, y);
 
                     geometry_msgs::PoseStamped pose = goal;
@@ -183,6 +182,13 @@ namespace astar_planner
                     pose.pose.orientation.w = 1.0;
 
                     plan.push_back(pose);
+                    nav_msgs::Path path_msg;
+                    path_msg.poses = plan;
+                    path_msg.header.frame_id = costmap_ros_->getGlobalFrameID();
+                    path_msg.header.stamp = ros::Time::now();
+
+                    // Publish the path
+                    path_pub.publish(path_msg);
                 }
 
                 float path_length = 0.0;
@@ -268,19 +274,15 @@ namespace astar_planner
 
     vector<int> AstarPlanner::RAstarPlanner(int startCell, int goalCell)
     {
-
         vector<int> bestPath;
-
         // float g_score [mapSize][2];
-        float g_score[mapSize];
-
+        std::vector<float> g_score(mapSize);
         for (uint i = 0; i < mapSize; i++)
             g_score[i] = infinity;
 
         timespec time1, time2;
         /* take current time here */
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
-
         bestPath = findPath(startCell, goalCell, g_score);
 
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
@@ -298,7 +300,7 @@ namespace astar_planner
     // Output: the best path
     // Description: it is used to generate the robot free path
     /*********************************************************************************/
-    vector<int> AstarPlanner::findPath(int startCell, int goalCell, float g_score[])
+    vector<int> AstarPlanner::findPath(int startCell, int goalCell, std::vector<float> g_score)
     {
         value++;
         vector<int> bestPath;
@@ -356,7 +358,7 @@ namespace astar_planner
     // Output: the best path
     // Description: it is used to construct the robot path
     /*********************************************************************************/
-    vector<int> AstarPlanner::constructPath(int startCell, int goalCell, float g_score[])
+    vector<int> AstarPlanner::constructPath(int startCell, int goalCell, std::vector<float> g_score)
     {
         vector<int> bestPath;
         vector<int> path;
@@ -414,7 +416,7 @@ namespace astar_planner
     // Output:
     // Description: it is used to add a neighbor Cell to the open list
     /*********************************************************************************/
-    void AstarPlanner::addNeighborCellToOpenList(multiset<cells> &OPL, int neighborCell, int goalCell, float g_score[])
+    void AstarPlanner::addNeighborCellToOpenList(multiset<cells> &OPL, int neighborCell, int goalCell, std::vector<float> g_score)
     {
         cells CP;
         CP.currentCell = neighborCell; // insert the neighbor cell

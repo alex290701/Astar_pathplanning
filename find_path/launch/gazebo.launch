@@ -13,7 +13,7 @@
     <arg name="paused" value="$(arg paused)" />
     <arg name="use_sim_time" value="$(arg use_sim_time)" />
     <arg name="headless" value="$(arg headless)" />
-    <arg name="world_name" value="$(find find_path)/worlds/maze.world" />
+    <arg name="world_name" value="$(find find_path)/worlds/my_world.world" />
   </include>
 
   <param name="robot_description"
