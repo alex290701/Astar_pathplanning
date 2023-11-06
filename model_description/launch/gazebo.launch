@@ -8,7 +8,7 @@
   <arg name="debug" default="false" />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find find_path)/worlds/maze.world"/>
+    <arg name="world_name" value="$(find model_description)/worlds/my_world.world"/>
     <arg name="debug" value="$(arg debug)" />
     <arg name="gui" value="$(arg gui)" />
     <arg name="paused" value="$(arg paused)" />
@@ -44,7 +44,7 @@
 
   <!-- <node name="landmark_spawner" pkg="model_description" type="landmark_spawner" /> -->
   <node pkg="map_server" name="map_server" type="map_server"
-    args="$(find find_path)/maps/map.yaml" />
+    args="$(find model_description)/maps/my_world_map.yaml" />
 
   <!-- <include file="$(find robot_navigation)/launch/robot_navigation.launch"> -->
     <!-- <arg name="no_static_map" value="true" /> -->
