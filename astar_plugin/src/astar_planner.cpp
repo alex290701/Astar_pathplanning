@@ -11,7 +11,7 @@ static const float INFINIT_COST = INT_MAX; //!< cost of non connected nodes
 float infinity = std::numeric_limits<float>::infinity();
 float tBreak; // coefficient for breaking ties
 ros::Publisher path_pub;
-ofstream MyExcelFile("A*_result.xlsx", ios::trunc);
+// ofstream MyExcelFile("A*_result.xlsx", ios::trunc);
 
 int clock_gettime(clockid_t clk_id, struct timespect *tp);
 
@@ -35,12 +35,11 @@ inline vector<int> findFreeNeighborCell(int CellID);
 
 namespace astar_planner
 {
-    AstarPlanner::AstarPlanner()
+    AstarPlanner::AstarPlanner() : initialized_(false)
     {
     }
-    AstarPlanner::AstarPlanner(ros::NodeHandle &nh)
+    AstarPlanner::AstarPlanner(ros::NodeHandle &nh) : ROSNodeHandle(nh), initialized_(false)
     {
-        ROSNodeHandle = nh;
     }
     AstarPlanner::AstarPlanner(std::string name, costmap_2d::Costmap2DROS *costmap_ros)
     {
@@ -81,7 +80,7 @@ namespace astar_planner
                 }
             }
 
-            MyExcelFile << "StartID\tStartX\tStartY\tGoalID\tGoalX\tGoalY\tPlannertime(ms)\tpathLength\tnumberOfCells\t" << endl;
+            // MyExcelFile << "StartID\tStartX\tStartY\tGoalID\tGoalX\tGoalY\tPlannertime(ms)\tpathLength\tnumberOfCells\t" << endl;
 
             ROS_INFO("RAstar planner initialized successfully");
             initialized_ = true;
@@ -136,7 +135,7 @@ namespace astar_planner
 
             goalCell = convertToCellIndex(goalX, goalY);
 
-            MyExcelFile << startCell << "\t" << start.pose.position.x << "\t" << start.pose.position.y << "\t" << goalCell << "\t" << goal.pose.position.x << "\t" << goal.pose.position.y;
+            // MyExcelFile << startCell << "\t" << start.pose.position.x << "\t" << start.pose.position.y << "\t" << goalCell << "\t" << goal.pose.position.x << "\t" << goal.pose.position.y;
         }
         else
         {
@@ -153,6 +152,8 @@ namespace astar_planner
 
             vector<int> bestPath;
             bestPath.clear();
+            ROS_INFO("New goal received. Creating plan...");
+
             bestPath = RAstarPlanner(startCell, goalCell);
 
             // if the global planner find a path
@@ -176,10 +177,10 @@ namespace astar_planner
                     pose.pose.position.y = y;
                     pose.pose.position.z = 0.0;
 
-                    pose.pose.orientation.x = 0.0;
-                    pose.pose.orientation.y = 0.0;
-                    pose.pose.orientation.z = 0.0;
-                    pose.pose.orientation.w = 1.0;
+                    pose.pose.orientation.x = goal.pose.orientation.x;
+                    pose.pose.orientation.y = goal.pose.orientation.y;
+                    pose.pose.orientation.z = goal.pose.orientation.z;
+                    pose.pose.orientation.w = goal.pose.orientation.w;
 
                     plan.push_back(pose);
                     nav_msgs::Path path_msg;
@@ -204,8 +205,8 @@ namespace astar_planner
                                          (*it).pose.position.y - last_pose.pose.position.y);
                     last_pose = *it;
                 }
-                cout << "The global path length: " << path_length << " meters" << endl;
-                MyExcelFile << "\t" << path_length << "\t" << plan.size() << endl;
+                // cout << "The global path length: " << path_length << " meters" << endl;
+                // MyExcelFile << "\t" << path_length << "\t" << plan.size() << endl;
                 // publish the plan
 
                 return true;
@@ -287,9 +288,9 @@ namespace astar_planner
 
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
 
-        cout << "time to generate best global path by Relaxed A* = " << (diff(time1, time2).tv_sec) * 1e3 + (diff(time1, time2).tv_nsec) * 1e-6 << " microseconds" << endl;
+        // cout << "time to generate best global path by Relaxed A* = " << (diff(time1, time2).tv_sec) * 1e3 + (diff(time1, time2).tv_nsec) * 1e-6 << " microseconds" << endl;
 
-        MyExcelFile << "\t" << (diff(time1, time2).tv_sec) * 1e3 + (diff(time1, time2).tv_nsec) * 1e-6;
+        // MyExcelFile << "\t" << (diff(time1, time2).tv_sec) * 1e3 + (diff(time1, time2).tv_nsec) * 1e-6;
 
         return bestPath;
     }
